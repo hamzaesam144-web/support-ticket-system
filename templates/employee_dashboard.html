@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Employee Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <div class="top-bar">
+        <div>
+            <h1>Employee Dashboard</h1>
+            <p>Welcome, {{ session["username"] }}</p>
+        </div>
+
+        <div class="top-bar-links">
+            <a href="{{ url_for('create_ticket') }}" class="button">
+                Create Ticket
+            </a>
+
+            <a href="{{ url_for('logout') }}" class="button button-danger">
+                Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="summary-container">
+
+        <div class="summary-card">
+            <h3>Open</h3>
+            <p>{{ summary["Open"] }}</p>
+        </div>
+
+        <div class="summary-card">
+            <h3>In Progress</h3>
+            <p>{{ summary["In Progress"] }}</p>
+        </div>
+
+        <div class="summary-card">
+            <h3>Resolved</h3>
+            <p>{{ summary["Resolved"] }}</p>
+        </div>
+
+        <div class="summary-card">
+            <h3>Closed</h3>
+            <p>{{ summary["Closed"] }}</p>
+        </div>
+
+    </div>
+
+    <!-- SEARCH + FILTERS -->
+    <h2>Search & Filter Tickets</h2>
+
+    <form method="GET" action="{{ url_for('employee_dashboard') }}">
+
+        <div class="filters">
+
+            <div>
+                <label>Search</label>
+
+                <input type="text" name="search" placeholder="Search by title" value="{{ search }}">
+            </div>
+
+            <div>
+                <label>Status</label>
+
+                <select name="status">
+
+                    <option value="">
+                        All Statuses
+                    </option>
+
+                    <option value="Open" {% if status=="Open" %}selected{% endif %}>
+                        Open
+                    </option>
+
+                    <option value="In Progress" {% if status=="In Progress" %}selected{% endif %}>
+                        In Progress
+                    </option>
+
+                    <option value="Resolved" {% if status=="Resolved" %}selected{% endif %}>
+                        Resolved
+                    </option>
+
+                    <option value="Closed" {% if status=="Closed" %}selected{% endif %}>
+                        Closed
+                    </option>
+
+                </select>
+            </div>
+
+            <div>
+                <label>Priority</label>
+
+                <select name="priority">
+
+                    <option value="">
+                        All Priorities
+                    </option>
+
+                    <option value="Low" {% if priority=="Low" %}selected{% endif %}>
+                        Low
+                    </option>
+
+                    <option value="Medium" {% if priority=="Medium" %}selected{% endif %}>
+                        Medium
+                    </option>
+
+                    <option value="High" {% if priority=="High" %}selected{% endif %}>
+                        High
+                    </option>
+
+                </select>
+            </div>
+
+            <div>
+                <label>Assignee</label>
+
+                <select name="assignee">
+
+                    <option value="">
+                        All Assignees
+                    </option>
+
+                    <option value="unassigned" {% if assignee=="unassigned" %}selected{% endif %}>
+                        Unassigned
+                    </option>
+
+                    {% for user in support_users %}
+
+                    <option value="{{ user['id'] }}" {% if assignee==user['id']|string %}selected{% endif %}>
+                        {{ user["username"] }}
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+            </div>
+
+            <div>
+                <button type="submit">
+                    Apply Filters
+                </button>
+
+                <a href="{{ url_for('employee_dashboard') }}" class="button button-secondary">
+                    Clear
+                </a>
+            </div>
+
+        </div>
+
+    </form>
+
+    <!-- MY TICKETS -->
+    <h2>My Tickets</h2>
+
+    {% if tickets %}
+
+    <div class="table-container">
+
+        <table>
+
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Assigned To</th>
+            </tr>
+
+            {% for ticket in tickets %}
+
+            <tr>
+
+                <td>
+                    #{{ ticket["id"] }}
+                </td>
+
+                <td>
+                    <a href="{{ url_for('ticket_details', ticket_id=ticket['id']) }}">
+                        {{ ticket["title"] }}
+                    </a>
+                </td>
+
+                <td>
+                    {{ ticket["category"] }}
+                </td>
+
+                <td>
+
+                    {% if ticket["priority"] == "Low" %}
+
+                    <span class="priority priority-low">
+                        Low
+                    </span>
+
+                    {% elif ticket["priority"] == "Medium" %}
+
+                    <span class="priority priority-medium">
+                        Medium
+                    </span>
+
+                    {% elif ticket["priority"] == "High" %}
+
+                    <span class="priority priority-high">
+                        High
+                    </span>
+
+                    {% endif %}
+
+                </td>
+
+                <td>
+
+                    {% if ticket["status"] == "Open" %}
+
+                    <span class="status status-open">
+                        Open
+                    </span>
+
+                    {% elif ticket["status"] == "In Progress" %}
+
+                    <span class="status status-in-progress">
+                        In Progress
+                    </span>
+
+                    {% elif ticket["status"] == "Resolved" %}
+
+                    <span class="status status-resolved">
+                        Resolved
+                    </span>
+
+                    {% elif ticket["status"] == "Closed" %}
+
+                    <span class="status status-closed">
+                        Closed
+                    </span>
+
+                    {% endif %}
+
+                </td>
+
+                <td>
+
+                    {% if ticket["assigned_name"] %}
+
+                    {{ ticket["assigned_name"] }}
+
+                    {% else %}
+
+                    <span style="color: #6b7280;">
+                        Unassigned
+                    </span>
+
+                    {% endif %}
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </table>
+
+    </div>
+
+    {% else %}
+
+    <div class="ticket-card">
+        <p>No tickets found.</p>
+    </div>
+
+    {% endif %}
+
+</body>
+
+</html>

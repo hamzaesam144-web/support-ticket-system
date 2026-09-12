@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Ticket Details</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+        <div>
+            <h1>Ticket #{{ ticket["id"] }}</h1>
+            <p>{{ ticket["title"] }}</p>
+        </div>
+
+        <div class="top-bar-links">
+
+            {% if session["role"] == "employee" %}
+
+            <a href="{{ url_for('employee_dashboard') }}" class="button button-secondary">
+                Back to Dashboard
+            </a>
+
+            {% elif session["role"] == "support" %}
+
+            <a href="{{ url_for('support_dashboard') }}" class="button button-secondary">
+                Back to Dashboard
+            </a>
+
+            {% endif %}
+
+        </div>
+    </div>
+
+
+    <!-- TICKET INFORMATION -->
+    <div class="ticket-card">
+
+        <h2>Ticket Information</h2>
+
+        <p>
+            <strong>Creator:</strong>
+            {{ ticket["creator_name"] }}
+        </p>
+
+        <p>
+            <strong>Description:</strong><br>
+            {{ ticket["description"] }}
+        </p>
+
+        <p>
+            <strong>Category:</strong>
+            {{ ticket["category"] }}
+        </p>
+
+        <p>
+            <strong>Priority:</strong>
+
+            {% if ticket["priority"] == "Low" %}
+
+            <span class="priority priority-low">
+                Low
+            </span>
+
+            {% elif ticket["priority"] == "Medium" %}
+
+            <span class="priority priority-medium">
+                Medium
+            </span>
+
+            {% elif ticket["priority"] == "High" %}
+
+            <span class="priority priority-high">
+                High
+            </span>
+
+            {% endif %}
+
+        </p>
+
+        <p>
+            <strong>Status:</strong>
+
+            {% if ticket["status"] == "Open" %}
+
+            <span class="status status-open">
+                Open
+            </span>
+
+            {% elif ticket["status"] == "In Progress" %}
+
+            <span class="status status-in-progress">
+                In Progress
+            </span>
+
+            {% elif ticket["status"] == "Resolved" %}
+
+            <span class="status status-resolved">
+                Resolved
+            </span>
+
+            {% elif ticket["status"] == "Closed" %}
+
+            <span class="status status-closed">
+                Closed
+            </span>
+
+            {% endif %}
+
+        </p>
+
+        <p>
+            <strong>Assigned To:</strong>
+
+            {% if ticket["assigned_name"] %}
+
+            {{ ticket["assigned_name"] }}
+
+            {% else %}
+
+            <span style="color: #6b7280;">
+                Unassigned
+            </span>
+
+            {% endif %}
+        </p>
+
+        <p>
+            <strong>Created At:</strong>
+            {{ ticket["created_at"] }}
+        </p>
+
+        <p>
+            <strong>Updated At:</strong>
+            {{ ticket["updated_at"] }}
+        </p>
+
+    </div>
+
+
+    <!-- ACTIONS -->
+    {% if ticket["status"] != "Closed" %}
+
+    <h2>Ticket Actions</h2>
+
+    {% endif %}
+
+
+    <!-- START WORK -->
+    {% if session["role"] == "support"
+    and ticket["status"] == "Open"
+    and ticket["assigned_to"] %}
+
+    <div class="ticket-card">
+
+        <h3>Start Work</h3>
+
+        <p>
+            This ticket is assigned and ready to be started.
+        </p>
+
+        <form method="POST" action="{{ url_for('start_ticket', ticket_id=ticket['id']) }}">
+
+            <button type="submit">
+                Start Work
+            </button>
+
+        </form>
+
+    </div>
+
+    {% endif %}
+
+
+    <!-- ASSIGN / REASSIGN -->
+    {% if session["role"] == "support"
+    and ticket["status"] != "Closed" %}
+
+    <div class="ticket-card">
+
+        <h3>Assign Ticket</h3>
+
+        <form method="POST" action="{{ url_for('assign_ticket', ticket_id=ticket['id']) }}">
+
+            <label>Support Agent</label>
+
+            <select name="support_id" required>
+
+                {% for user in support_users %}
+
+                <option value="{{ user['id'] }}" {% if ticket["assigned_to"]==user["id"] %}selected{% endif %}>
+                    {{ user["username"] }}
+                </option>
+
+                {% endfor %}
+
+            </select>
+
+            <button type="submit">
+                Assign / Reassign
+            </button>
+
+        </form>
+
+    </div>
+
+    {% endif %}
+
+
+    <!-- RESOLVE -->
+    {% if session["role"] == "support"
+    and ticket["status"] == "In Progress" %}
+
+    <div class="ticket-card">
+
+        <h3>Resolve Ticket</h3>
+
+        <form method="POST" action="{{ url_for('resolve_ticket', ticket_id=ticket['id']) }}">
+
+            <label>Resolution Note</label>
+
+            <textarea name="resolution_note" placeholder="Describe how the issue was resolved..." required>
+            </textarea>
+
+            <button type="submit" class="button-success">
+                Resolve Ticket
+            </button>
+
+        </form>
+
+    </div>
+
+    {% endif %}
+
+
+    <!-- EMPLOYEE RESOLVED ACTIONS -->
+    {% if session["role"] == "employee"
+    and ticket["status"] == "Resolved" %}
+
+    <div class="ticket-card">
+
+        <h3>Ticket Resolved</h3>
+
+        <p>
+            If the issue is fully resolved, you can close the ticket.
+        </p>
+
+        <form method="POST" action="{{ url_for('close_ticket', ticket_id=ticket['id']) }}">
+
+            <button type="submit" class="button-success">
+                Close Ticket
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <div class="ticket-card">
+
+        <h3>Reopen Ticket</h3>
+
+        <p>
+            If the problem still exists, explain why you need to reopen it.
+        </p>
+
+        <form method="POST" action="{{ url_for('reopen_ticket', ticket_id=ticket['id']) }}">
+
+            <label>Reopen Reason</label>
+
+            <textarea name="reopen_reason" placeholder="Explain why this ticket needs to be reopened..." required>
+            </textarea>
+
+            <button type="submit">
+                Reopen Ticket
+            </button>
+
+        </form>
+
+    </div>
+
+    {% endif %}
+
+
+    <!-- CLOSED MESSAGE -->
+    {% if ticket["status"] == "Closed" %}
+
+    <div class="ticket-card">
+
+        <h3>Ticket Closed</h3>
+
+        <p>
+            This ticket is closed and is now read-only.
+        </p>
+
+    </div>
+
+    {% endif %}
+
+
+    <!-- COMMENTS -->
+    <h2>Comments</h2>
+
+    {% if comments %}
+
+    {% for comment in comments %}
+
+    <div class="comment-item">
+
+        <div class="comment-meta">
+            <strong>{{ comment["username"] }}</strong>
+            •
+            {{ comment["created_at"] }}
+        </div>
+
+        <div>
+            {{ comment["content"] }}
+        </div>
+
+    </div>
+
+    {% endfor %}
+
+    {% else %}
+
+    <div class="ticket-card">
+        <p>No comments yet.</p>
+    </div>
+
+    {% endif %}
+
+
+    <!-- ADD COMMENT -->
+    {% if ticket["status"] != "Closed" %}
+
+    <div class="ticket-card">
+
+        <h3>Add Comment</h3>
+
+        <form method="POST" action="{{ url_for('add_comment', ticket_id=ticket['id']) }}">
+
+            <textarea name="comment" placeholder="Write your comment..." required>
+            </textarea>
+
+            <button type="submit">
+                Add Comment
+            </button>
+
+        </form>
+
+    </div>
+
+    {% endif %}
+
+
+    <!-- HISTORY -->
+    <h2>Ticket History</h2>
+
+    {% if history %}
+
+    {% for item in history %}
+
+    <div class="history-item">
+
+        <div class="history-meta">
+
+            <strong>{{ item["actor_name"] }}</strong>
+            •
+            {{ item["created_at"] }}
+
+        </div>
+
+        <div>
+
+            <strong>{{ item["change_type"] }}:</strong>
+
+            {{ item["old_value"] }}
+            →
+            {{ item["new_value"] }}
+
+        </div>
+
+        {% if item["note"] %}
+
+        <p>
+            <strong>Note:</strong>
+            {{ item["note"] }}
+        </p>
+
+        {% endif %}
+
+    </div>
+
+    {% endfor %}
+
+    {% else %}
+
+    <div class="ticket-card">
+        <p>No history yet.</p>
+    </div>
+
+    {% endif %}
+
+</body>
+
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Create Ticket</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <div class="top-bar">
+        <div>
+            <h1>Create New Ticket</h1>
+            <p>Submit a new support request</p>
+        </div>
+
+        <div class="top-bar-links">
+            <a href="{{ url_for('employee_dashboard') }}" class="button button-secondary">
+                Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="ticket-card">
+
+        {% if error %}
+        <div class="error-message">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="POST">
+
+            <label>Title</label>
+            <input type="text" name="title" placeholder="Enter a short ticket title" required>
+
+            <label>Description</label>
+            <textarea name="description" placeholder="Describe the problem or request..." required></textarea>
+
+            <label>Category</label>
+            <select name="category" required>
+                <option value="Technical Issue">Technical Issue</option>
+                <option value="Access Request">Access Request</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <label>Priority</label>
+            <select name="priority" required>
+                <option value="Low">Low</option>
+                <option value="Medium" selected>Medium</option>
+                <option value="High">High</option>
+            </select>
+
+            <button type="submit">
+                Create Ticket
+            </button>
+
+        </form>
+
+    </div>
+
+</body>
+
+</html>

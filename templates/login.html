@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Login | Support Ticket System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <div class="login-container">
+
+        <h1>Support Ticket System</h1>
+
+        <form method="POST">
+
+            <h2>Login</h2>
+
+            <p style="color: #6b7280; margin-bottom: 20px;">
+                Sign in to access your support dashboard.
+            </p>
+
+            {% if error %}
+            <div class="error-message">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <label>Username</label>
+
+            <input type="text" name="username" placeholder="Enter your username" autocomplete="username" required>
+
+            <label>Password</label>
+
+            <input type="password" name="password" placeholder="Enter your password" autocomplete="current-password"
+                required>
+
+            <button type="submit">
+                Login
+            </button>
+
+        </form>
+
+    </div>
+
+</body>
+
+</html>
