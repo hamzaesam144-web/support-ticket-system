@@ -1,19 +1,7 @@
 from fastapi import APIRouter
-from pydantic import BaseModel
+from app.schemas.ticket import TicketCreate, TicketResponse
 
 router = APIRouter()
-
-
-class TicketCreate(BaseModel):
-    title: str
-    description: str
-    priority: str
-
-
-class TicketResponse(BaseModel):
-    title: str
-    description: str
-    priority: str
 
 
 @router.post("/tickets", status_code=201, response_model=TicketResponse)
@@ -21,6 +9,7 @@ def create_ticket(ticket: TicketCreate):
     return {
         "title": ticket.title,
         "description": ticket.description,
+        "category": ticket.category,
         "priority": ticket.priority
     }
 
