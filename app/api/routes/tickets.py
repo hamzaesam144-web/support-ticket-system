@@ -1,10 +1,13 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from app.schemas.ticket import TicketCreate, TicketResponse
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/tickets",
+    tags=["Tickets"]
+)
 
 
-@router.post("/tickets", status_code=201, response_model=TicketResponse)
+@router.post("", status_code=201, response_model=TicketResponse)
 def create_ticket(ticket: TicketCreate):
     return {
         "title": ticket.title,
@@ -14,14 +17,21 @@ def create_ticket(ticket: TicketCreate):
     }
 
 
-@router.get("/tickets/{ticket_id}")
+@router.get("/{ticket_id}")
 def get_ticket(ticket_id: int):
+
+    if ticket_id == 999:
+        raise HTTPException(
+            status_code=404,
+            detail="Ticket not found"
+        )
+
     return {
         "ticket_id": ticket_id
     }
 
 
-@router.get("/tickets")
+@router.get("")
 def get_tickets(status: str | None = None):
     return {
         "status_filter": status
